@@ -1,15 +1,24 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../../assets/images/logo.png";
+import { login } from "../../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Temporary navigation until backend authentication is added
-    navigate("/onboarding");
+    try {
+      await login({ username: form.username, password: form.password });
+      navigate("/onboarding");
+    } catch (err) {
+      setError(err?.response?.data?.detail || "Unable to sign in right now.");
+    }
   };
 
   return (
@@ -42,12 +51,14 @@ export default function Login() {
           <form onSubmit={handleSubmit} className="mt-10 space-y-5">
             <div>
               <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
-                Email
+                Username
               </label>
 
               <input
-                type="email"
-                placeholder="you@example.com"
+                type="text"
+                placeholder="username"
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
                 className="
                   w-full
                   rounded-2xl
@@ -75,6 +86,8 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="
                   w-full
                   rounded-2xl

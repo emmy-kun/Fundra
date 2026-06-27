@@ -24,6 +24,11 @@ class Transaction(models.Model):
         related_name='transactions_as_seller'
     )
     amount = models.DecimalField(max_digits=19, decimal_places=2)
+    fee_charged = models.DecimalField(
+        max_digits=19,
+        decimal_places=2,
+        default=Decimal('1000.00')
+    )
     status = models.CharField(
         max_length=20,
         choices=Status.choices,

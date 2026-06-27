@@ -22,13 +22,16 @@ import riskfree from "../../assets/images/risk free.png";
 import trusted from "../../assets/images/trusted.png";
 import verified from "../../assets/images/verified.png";
 import { motion } from "framer-motion";
+import { getProfile } from '../../services/authService';
+import { getMyWallet } from '../../services/walletService';
+import { getMyTransactions } from '../../services/transactionService';
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
-  // Later replace with Auth Context
-  const user = null;
-
+  const [user, setUser] = useState(null);
+  const [balance, setBalance] = useState(0);
+  const [transactionsList, setTransactionsList] = useState([]);
   const [showBalance, setShowBalance] = useState(true);
 
   const slides = [
@@ -65,32 +68,30 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, [slides.length]);
 
-  const transactions = [
-    {
-      id: 1,
-      title: "John Doe",
-      status: "Payment Received",
-      amount: "+$300",
-      date: "Today",
-      type: "success",
-    },
-    {
-      id: 2,
-      title: "Nike Store",
-      status: "Pending Escrow",
-      amount: "$120",
-      date: "Yesterday",
-      type: "pending",
-    },
-    {
-      id: 3,
-      title: "Amazon",
-      status: "Refunded",
-      amount: "-$40",
-      date: "2 days ago",
-      type: "refund",
-    },
-  ];
+  useEffect(() => {
+    (async () => {
+      try {
+        const profile = await getProfile();
+        setUser(profile.data);
+      } catch (err) {
+        // ignore - user may not be authenticated in dev
+      }
+
+      try {
+        const walletRes = await getMyWallet();
+        setBalance(Number(walletRes.data.available_balance || 0));
+      } catch (err) {
+        // ignore
+      }
+
+      try {
+        const txRes = await getMyTransactions();
+        setTransactionsList(txRes.data || []);
+      } catch (err) {
+        // ignore
+      }
+    })();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -109,7 +110,7 @@ export default function Dashboard() {
               <p className="text-sm text-gray-400">Welcome back,</p>
 
               <h1 className="text-2xl font-bold text-gray-900">
-                {user?.name || "User"}
+                {user?.first_name || user?.username || "User"}
               </h1>
             </div>
           </div>
@@ -122,9 +123,11 @@ export default function Dashboard() {
             >
               <Bell size={20} />
 
-              <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                3
-              </span>
+              {transactionsList && (
+                <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
+                  {transactionsList.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING').length}
+                </span>
+              )}
             </button>
 
             {/* Profile */}
@@ -146,7 +149,7 @@ export default function Dashboard() {
                 <p className="text-blue-100 text-sm">Available Balance</p>
 
                 <h2 className="mt-3 text-4xl font-extrabold">
-                  {showBalance ? "$5,000.00" : "••••••••"}
+                  {showBalance ? `$${Number(balance).toFixed(2)}` : "••••••••"}
                 </h2>
               </div>
 
@@ -287,46 +290,50 @@ export default function Dashboard() {
             </h3>
 
             <div className="space-y-4">
-              {transactions.map((item) => (
-                <div
-                  key={item.id}
-                  className="border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all cursor-pointer"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex gap-3">
-                      <div>
-                        {item.type === "success" && (
-                          <CheckCircle2 size={22} className="text-green-500" />
-                        )}
+              {transactionsList && transactionsList.length > 0 ? (
+                transactionsList.map((item) => (
+                  <div
+                    key={item.id}
+                    className="border border-gray-100 rounded-2xl p-4 hover:shadow-md transition-all cursor-pointer"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div className="flex gap-3">
+                        <div>
+                          {item.status === "SUCCESSFUL" && (
+                            <CheckCircle2 size={22} className="text-green-500" />
+                          )}
 
-                        {item.type === "pending" && (
-                          <Clock3 size={22} className="text-amber-500" />
-                        )}
+                          {(item.status === "PENDING" || item.status === "PROCESSING" || item.status === "SHIPPED") && (
+                            <Clock3 size={22} className="text-amber-500" />
+                          )}
 
-                        {item.type === "refund" && (
-                          <RotateCcw size={22} className="text-red-500" />
-                        )}
+                          {item.status === "CANCELED" && (
+                            <RotateCcw size={22} className="text-red-500" />
+                          )}
+                        </div>
+
+                        <div>
+                          <h4 className="font-semibold text-gray-900">
+                            {item.status}
+                          </h4>
+
+                          <p className="text-sm text-gray-500">{item.seller?.username || item.buyer?.username}</p>
+
+                          <p className="text-xs text-gray-400 mt-1">
+                            {new Date(item.created_at).toLocaleString()}
+                          </p>
+                        </div>
                       </div>
 
-                      <div>
-                        <h4 className="font-semibold text-gray-900">
-                          {item.status}
-                        </h4>
-
-                        <p className="text-sm text-gray-500">{item.title}</p>
-
-                        <p className="text-xs text-gray-400 mt-1">
-                          {item.date}
-                        </p>
-                      </div>
+                      <span className="font-bold text-gray-900">
+                        ${Number(item.amount).toFixed(2)}
+                      </span>
                     </div>
-
-                    <span className="font-bold text-gray-900">
-                      {item.amount}
-                    </span>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No recent transactions</p>
+              )}
             </div>
           </div>
         </div>

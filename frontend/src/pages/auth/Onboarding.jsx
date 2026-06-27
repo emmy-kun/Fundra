@@ -9,11 +9,22 @@ export default function Onboarding() {
   const navigate = useNavigate();
 
   const handleContinue = () => {
-    navigate(
-      role === "buyer"
-        ? "/buyer/dashboard"
-        : "/seller/dashboard"
-    );
+    // Persist role to backend before continuing
+    (async () => {
+      try {
+        const { updateRole } = await import('../../services/authService');
+        await updateRole(role === 'buyer' ? 'BUYER' : 'SELLER');
+      } catch (err) {
+        // ignore failure; allow client-side flow
+        console.error('Failed to persist role', err);
+      } finally {
+        navigate(
+          role === "buyer"
+            ? "/buyer/dashboard"
+            : "/seller/dashboard"
+        );
+      }
+    })();
   };
 
   return (

@@ -18,6 +18,7 @@ class TransactionSerializer(serializers.ModelSerializer):
             'seller',
             'seller_username',
             'amount',
+            'fee_charged',
             'status',
             'description',
             'can_cancel',
@@ -29,16 +30,29 @@ class TransactionSerializer(serializers.ModelSerializer):
 
 
 class TransactionCreateSerializer(serializers.ModelSerializer):
-    seller_id = serializers.IntegerField(write_only=True)
+    seller_id = serializers.IntegerField(write_only=True, required=False)
+    seller_email = serializers.EmailField(write_only=True, required=False)
 
     class Meta:
         model = Transaction
-        fields = ('seller_id', 'amount', 'description')
+        fields = ('seller_id', 'seller_email', 'amount', 'description')
 
     def validate_amount(self, value):
         if value <= 0:
             raise serializers.ValidationError("Amount must be greater than 0")
         return value
+
+    def validate(self, attrs):
+        seller_id = attrs.get('seller_id')
+        seller_email = attrs.get('seller_email')
+
+        if seller_id is None and seller_email is None:
+            raise serializers.ValidationError({"seller_id": "Either seller_id or seller_email is required"})
+
+        if seller_id is not None and seller_email is not None:
+            raise serializers.ValidationError({"seller_email": "Provide either seller_id or seller_email, not both"})
+
+        return attrs
 
 
 class TransactionStatusUpdateSerializer(serializers.Serializer):
@@ -63,6 +77,7 @@ class TransactionDetailSerializer(serializers.ModelSerializer):
             'buyer',
             'seller',
             'amount',
+            'fee_charged',
             'status',
             'description',
             'can_cancel',

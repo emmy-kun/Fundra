@@ -1,5 +1,5 @@
 from django.contrib import admin
-from wallets.models import Wallet
+from wallets.models import PlatformRevenue, Wallet
 
 
 @admin.register(Wallet)
@@ -13,3 +13,11 @@ class WalletAdmin(admin.ModelAdmin):
     def total_balance(self, obj):
         return obj.total_balance
     total_balance.short_description = 'Total Balance'
+
+
+@admin.register(PlatformRevenue)
+class PlatformRevenueAdmin(admin.ModelAdmin):
+    list_display = ('transaction', 'amount', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('transaction__id', 'transaction__buyer__username', 'transaction__seller__username')
+    readonly_fields = ('created_at',)

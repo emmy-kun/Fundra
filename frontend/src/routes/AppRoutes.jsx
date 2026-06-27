@@ -7,6 +7,7 @@ import Onboarding from "../pages/auth/Onboarding";
 import BuyerDashboard from "../pages/buyer/Dashboard";
 import AddMoney from "../pages/buyer/AddMoney";
 import SendMoney from "../pages/buyer/SendMoney";
+import Withdraw from "../pages/buyer/Withdraw";
 
 import TransactionHistory from "../pages/shared/TransactionHistory";
 import TransactionDetails from "../pages/shared/TransactionDetails";
@@ -24,6 +25,7 @@ export default function AppRoutes() {
 
       <Route path="/buyer/dashboard" element={<BuyerDashboard />} />
       <Route path="/buyer/add-money" element={<AddMoney />} />
+      <Route path="/buyer/withdraw" element={<Withdraw />} />
       <Route path="/buyer/send-money" element={<SendMoney />} />
 
       <Route

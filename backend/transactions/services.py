@@ -1,9 +1,10 @@
+from decimal import Decimal
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from transactions.models import Transaction
-from wallets.services import WalletService
+from wallets.services import PLATFORM_FEE, WalletService
 from utils.exceptions import InvalidTransactionStatusError, UnauthorizedTransactionAccessError
 
 User = get_user_model()
@@ -25,17 +26,22 @@ class TransactionService:
         if not seller.is_seller():
             raise ValueError("Only sellers can receive transactions")
 
-        # Lock funds in escrow
-        WalletService.lock_to_escrow(buyer, amount)
+        amount_value = Decimal(str(amount))
+        fee_value = PLATFORM_FEE
+        total_required = amount_value + fee_value
 
-        # Create transaction
+        WalletService.lock_to_escrow(buyer, amount_value, platform_fee=fee_value)
+
         txn = Transaction.objects.create(
             buyer=buyer,
             seller=seller,
-            amount=amount,
+            amount=amount_value,
+            fee_charged=fee_value,
             status=Transaction.Status.PENDING,
             description=description
         )
+
+        WalletService.record_platform_revenue(txn, fee_value)
 
         return txn
 

@@ -164,24 +164,6 @@ export default function Profile() {
 
                 <span className="text-gray-400">›</span>
               </button>
-
-              <button
-                className="
-      w-full
-      rounded-2xl
-      border
-      border-red-200
-      bg-red-50
-      py-4
-      text-red-600
-      font-semibold
-      hover:bg-red-100
-      transition-all
-      cursor-pointer
-    "
-              >
-                Logout
-              </button>
             </div>
           </div>
         </div>

@@ -1,15 +1,38 @@
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../../assets/images/logo.png";
+import { signup, login } from "../../services/authService";
 
 export default function SignUp() {
   const navigate = useNavigate();
+  const [form, setForm] = useState({ fullName: "", email: "", password: "", password_confirm: "", role: "BUYER" });
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    // Temporary navigation until backend authentication is added
-    navigate("/onboarding");
+    try {
+      // Build payload: avoid spaces in username by using email local part; send full name as first_name
+      const usernameDerived = form.email ? form.email.split('@')[0] : form.fullName.replace(/\s+/g, '_');
+      const payload = {
+        username: usernameDerived,
+        email: form.email,
+        password: form.password,
+        password_confirm: form.password_confirm,
+        first_name: form.fullName,
+      };
+
+      await signup(payload);
+
+      // Auto-login after signup so onboarding and protected routes work
+      await login({ username: usernameDerived, password: form.password });
+      navigate("/onboarding");
+    } catch (err) {
+      const detail = err?.response?.data;
+      setError(typeof detail === "string" ? detail : Object.values(detail || {}).flat().join(" "));
+    }
   };
 
   return (
@@ -48,6 +71,8 @@ export default function SignUp() {
               <input
                 type="text"
                 placeholder="John Doe"
+                value={form.fullName}
+                onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                 className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -60,6 +85,8 @@ export default function SignUp() {
               <input
                 type="email"
                 placeholder="you@example.com"
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
                 className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
@@ -72,9 +99,27 @@ export default function SignUp() {
               <input
                 type="password"
                 placeholder="••••••••"
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div>
+              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
+                Confirm Password
+              </label>
+
+              <input
+                type="password"
+                placeholder="••••••••"
+                value={form.password_confirm}
+                onChange={(e) => setForm({ ...form, password_confirm: e.target.value })}
+                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
             <button
               type="submit"

@@ -1,5 +1,15 @@
 from rest_framework import serializers
-from wallets.models import Wallet
+from wallets.models import PlatformRevenue, Wallet
+
+
+class PlatformRevenueSummarySerializer(serializers.ModelSerializer):
+    transaction_id = serializers.IntegerField(source='transaction.id', read_only=True)
+    buyer_username = serializers.CharField(source='transaction.buyer.username', read_only=True)
+    seller_username = serializers.CharField(source='transaction.seller.username', read_only=True)
+
+    class Meta:
+        model = PlatformRevenue
+        fields = ('transaction_id', 'buyer_username', 'seller_username', 'amount', 'created_at')
 
 
 class WalletSerializer(serializers.ModelSerializer):

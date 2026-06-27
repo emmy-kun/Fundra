@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { ArrowLeft, Mail, Wallet, FileText, ShieldCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { createTransaction } from "../../services/transactionService";
 
 export default function SendMoney() {
   const navigate = useNavigate();
@@ -8,6 +9,19 @@ export default function SendMoney() {
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
   const [note, setNote] = useState("");
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      await createTransaction({ seller_email: email, amount: Number(amount), description: note });
+      navigate("/buyer/transaction-history");
+    } catch (err) {
+      setError(err?.response?.data?.error || "Unable to create this transaction.");
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -105,8 +119,11 @@ export default function SendMoney() {
           </div>
 
           {/* Continue */}
-          <button
-            className="
+          <form onSubmit={handleSubmit}>
+            {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+            <button
+              type="submit"
+              className="
               mt-6
               w-full
               py-4
@@ -125,6 +142,7 @@ export default function SendMoney() {
           >
             Continue
           </button>
+          </form>
 
         </div>
       </div>

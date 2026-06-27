@@ -1,12 +1,47 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowLeft, CreditCard, Building2, Smartphone } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { addFunds, getMyWallet } from "../../services/walletService";
 
 export default function AddMoney() {
   const navigate = useNavigate();
 
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [balance, setBalance] = useState(0);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const loadWallet = async () => {
+      try {
+        const response = await getMyWallet();
+        setBalance(response.data.available_balance || 0);
+      } catch (err) {
+        setError("Unable to load wallet balance.");
+      }
+    };
+
+    loadWallet();
+  }, []);
+
+  const handleSubmit = async () => {
+    if (!amount || !paymentMethod) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError("");
+
+    try {
+      await addFunds({ amount: Number(amount) });
+      navigate("/buyer/dashboard");
+    } catch (err) {
+      setError(err?.response?.data?.error || "Unable to add funds right now.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -54,7 +89,7 @@ export default function AddMoney() {
           </div>
 
           <p className="text-xs text-gray-400 mt-4">
-            Current Balance: USD 4,995
+            Current Balance: USD {Number(balance).toFixed(2)}
           </p>
         </div>
 
@@ -153,15 +188,18 @@ export default function AddMoney() {
         </div>
 
         {/* Continue Button */}
+        {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
+
         <button
-          disabled={!amount || !paymentMethod}
+          disabled={!amount || !paymentMethod || isSubmitting}
+          onClick={handleSubmit}
           className={`mt-8 w-full py-4 rounded-2xl font-semibold transition-all ${
-            !amount || !paymentMethod
+            !amount || !paymentMethod || isSubmitting
               ? "bg-gray-200 text-gray-400 cursor-not-allowed"
               : "bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 text-white hover:shadow-xl hover:scale-[1.01] cursor-pointer"
           }`}
         >
-          Continue
+          {isSubmitting ? "Processing..." : "Continue"}
         </button>
       </div>
     </div>

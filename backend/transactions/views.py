@@ -57,12 +57,15 @@ class TransactionViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        seller_id = serializer.validated_data['seller_id']
+        seller_id = serializer.validated_data.get('seller_id')
+        seller_email = serializer.validated_data.get('seller_email')
         amount = serializer.validated_data['amount']
         description = serializer.validated_data.get('description')
 
-        # Get seller
-        seller = get_object_or_404(self.queryset.model.seller.model, id=seller_id)
+        if seller_id is not None:
+            seller = get_object_or_404(self.queryset.model.seller.model, id=seller_id)
+        else:
+            seller = get_object_or_404(self.queryset.model.seller.model, email=seller_email)
 
         try:
             txn = TransactionService.create_transaction(
