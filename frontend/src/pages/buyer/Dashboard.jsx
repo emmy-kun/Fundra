@@ -131,11 +131,12 @@ export default function Dashboard() {
             </button>
 
             {/* Profile */}
-            <button
-              onClick={() => navigate("/profile")}
-              className="h-11 w-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-sm hover:shadow-lg transition-all cursor-pointer"
-            >
-              <User size={20} />
+            <button onClick={() => navigate("/profile")} className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer">
+              {user?.profile_image ? (
+                <img src={user.profile_image} alt="avatar" className="h-9 w-9 rounded-full object-cover" />
+              ) : (
+                <User size={20} className="text-blue-600" />
+              )}
             </button>
           </div>
         </div>

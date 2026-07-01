@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import logo from "../../assets/images/logo.png";
-import { login } from "../../services/authService";
+import { login, getProfile } from "../../services/authService";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -15,7 +15,19 @@ export default function Login() {
 
     try {
       await login({ username: form.username, password: form.password });
-      navigate("/onboarding");
+      // Determine whether onboarding is required
+      try {
+        const profile = await getProfile();
+        const onboarded = profile.data.onboarded;
+        const role = profile.data.role;
+        if (!onboarded) {
+          navigate("/onboarding");
+        } else {
+          navigate(role === 'SELLER' ? '/seller/dashboard' : '/buyer/dashboard');
+        }
+      } catch (e) {
+        navigate('/buyer/dashboard');
+      }
     } catch (err) {
       setError(err?.response?.data?.detail || "Unable to sign in right now.");
     }

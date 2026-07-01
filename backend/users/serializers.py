@@ -7,7 +7,11 @@ User = get_user_model()
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ('id', 'username', 'email', 'first_name', 'last_name', 'role', 'created_at', 'updated_at')
+        fields = (
+            'id', 'username', 'email', 'first_name', 'last_name', 'role',
+            'phone_number', 'is_email_verified', 'is_phone_verified', 'profile_image',
+            'onboarded', 'created_at', 'updated_at'
+        )
         read_only_fields = ('id', 'created_at', 'updated_at')
 
 
@@ -17,7 +21,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'role')
+        fields = ('username', 'email', 'password', 'password_confirm', 'first_name', 'last_name', 'role', 'phone_number')
 
     def validate(self, data):
         if data['password'] != data.pop('password_confirm'):
@@ -31,6 +35,7 @@ class UserCreateSerializer(serializers.ModelSerializer):
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', ''),
             role=validated_data.get('role', User.Role.BUYER),
+            phone_number=validated_data.get('phone_number', ''),
             password=validated_data['password']
         )
         return user

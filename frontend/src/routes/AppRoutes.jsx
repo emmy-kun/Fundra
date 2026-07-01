@@ -13,6 +13,7 @@ import TransactionHistory from "../pages/shared/TransactionHistory";
 import TransactionDetails from "../pages/shared/TransactionDetails";
 import Notifications from "../pages/notifications/Notifications";
 import Profile from "../pages/profile/Profile";
+import EditProfile from "../pages/profile/EditProfile";
 import Settings from "../pages/settings/Settings";
 export default function AppRoutes() {
   return (
@@ -36,6 +37,7 @@ export default function AppRoutes() {
 
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/profile" element={<Profile />} />
+      <Route path="/profile/edit" element={<EditProfile />} />
       <Route
   path="/settings"
   element={<Settings />}
