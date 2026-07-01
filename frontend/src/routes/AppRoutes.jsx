@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import SignUp from "../pages/auth/SignUp";
 import Login from "../pages/auth/Login";
+import ForgotPassword from "../pages/auth/ForgotPassword";
 import Onboarding from "../pages/auth/Onboarding";
 
 import BuyerDashboard from "../pages/buyer/Dashboard";
@@ -22,6 +23,7 @@ export default function AppRoutes() {
 
       <Route path="/signup" element={<SignUp />} />
       <Route path="/login" element={<Login />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/onboarding" element={<Onboarding />} />
 
       <Route path="/buyer/dashboard" element={<BuyerDashboard />} />

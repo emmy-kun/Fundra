@@ -45,3 +45,11 @@ export const sendVerification = async (type) => {
 export const verifyOtp = async (type, code) => {
   return api.post('/api/users/verify_otp/', { type, code });
 };
+
+export const forgotPassword = async (payload) => {
+  return api.post('/api/users/forgot_password/', payload);
+};
+
+export const resetPassword = async (payload) => {
+  return api.post('/api/users/reset_password/', payload);
+};

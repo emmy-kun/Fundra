@@ -120,8 +120,8 @@ export default function Login() {
             </div>
 
             <div className="flex justify-end">
-              <button
-                type="button"
+              <Link
+                to="/forgot-password"
                 className="
                   text-sm
                   font-medium
@@ -134,7 +134,7 @@ export default function Login() {
                 "
               >
                 Forgot Password?
-              </button>
+              </Link>
             </div>
 
             <button

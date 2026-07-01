@@ -112,6 +112,84 @@ class UserViewSet(viewsets.ModelViewSet):
         vc.delete()
         return Response({'message': f'{vtype} verified'})
 
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def forgot_password(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response(
+                {'error': 'Email is required.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.filter(email=email).first()
+        if user:
+            code = f"{random.randint(100000, 999999)}"
+            expires = timezone.now() + timedelta(minutes=10)
+            VerificationCode.objects.create(
+                user=user,
+                code=code,
+                vtype='password_reset',
+                expires_at=expires,
+            )
+
+            if user.email:
+                try:
+                    send_mail(
+                        'Fundra Password Reset Code',
+                        f'Your password reset code is {code}',
+                        None,
+                        [user.email],
+                        fail_silently=True,
+                    )
+                except Exception:
+                    pass
+
+        return Response(
+            {
+                'message': 'If an account exists for that email, a password reset code has been sent.',
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    @action(detail=False, methods=['post'], permission_classes=[AllowAny])
+    def reset_password(self, request):
+        email = request.data.get('email')
+        code = request.data.get('code')
+        new_password = request.data.get('new_password')
+        new_password_confirm = request.data.get('new_password_confirm')
+
+        if not email or not code or not new_password or not new_password_confirm:
+            return Response(
+                {'error': 'email, code, new_password, and new_password_confirm are required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if new_password != new_password_confirm:
+            return Response(
+                {'error': 'Passwords do not match'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user = User.objects.filter(email=email).first()
+        if not user:
+            return Response({'error': 'Invalid email or reset code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        now = timezone.now()
+        verification = VerificationCode.objects.filter(
+            user=user,
+            vtype='password_reset',
+            code=code,
+            expires_at__gt=now,
+        ).first()
+
+        if not verification:
+            return Response({'error': 'Invalid or expired reset code.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        user.set_password(new_password)
+        user.save()
+        verification.delete()
+        return Response({'message': 'Password has been reset successfully.'}, status=status.HTTP_200_OK)
+
     @action(detail=False, methods=['post'], permission_classes=[IsAuthenticated])
     def change_password(self, request):
         """Change user password."""

@@ -40,6 +40,7 @@ class VerificationCode(models.Model):
     TYPE_CHOICES = (
         ('email', 'Email'),
         ('phone', 'Phone'),
+        ('password_reset', 'Password Reset'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_codes')
