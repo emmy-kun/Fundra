@@ -34,6 +34,10 @@ export default function Dashboard() {
   const [transactionsList, setTransactionsList] = useState([]);
   const [showBalance, setShowBalance] = useState(true);
 
+  const pendingCount = transactionsList.filter(
+    (t) => t.status === "PENDING" || t.status === "PROCESSING"
+  ).length;
+
   const slides = [
     {
       image: paying,
@@ -123,15 +127,18 @@ export default function Dashboard() {
             >
               <Bell size={20} />
 
-              {transactionsList && (
+              {pendingCount > 0 && (
                 <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center">
-                  {transactionsList.filter((t) => t.status === 'PENDING' || t.status === 'PROCESSING').length}
+                  {pendingCount}
                 </span>
               )}
             </button>
 
             {/* Profile */}
-            <button onClick={() => navigate("/profile")} className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer">
+            <button
+              onClick={() => navigate("/profile")}
+              className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"
+            >
               {user?.profile_image ? (
                 <img src={user.profile_image} alt="avatar" className="h-9 w-9 rounded-full object-cover" />
               ) : (
@@ -180,13 +187,18 @@ export default function Dashboard() {
             </div>
 
             {/* TRANSACTION HISTORY */}
-            <button className="mt-8 w-full bg-white/15 hover:bg-white/25 transition-all rounded-2xl p-4 flex items-center justify-between cursor-pointer">
+            <button
+              className="mt-8 w-full bg-white/15 hover:bg-white/25 transition-all rounded-2xl p-4 flex items-center justify-between cursor-pointer"
+              onClick={() => navigate("/buyer/transaction-history")}
+            >
               <span className="font-medium">Transaction History</span>
 
               <div className="flex items-center gap-3">
-                <span className="bg-amber-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
-                  1 Pending
-                </span>
+                {pendingCount > 0 ? (
+                  <span className="bg-amber-400 text-gray-900 text-xs font-bold px-3 py-1 rounded-full">
+                    {pendingCount} Pending
+                  </span>
+                ) : null}
 
                 <ChevronRight size={18} />
               </div>

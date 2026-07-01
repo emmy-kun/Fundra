@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
@@ -7,49 +8,44 @@ import {
   XCircle,
   ChevronRight,
 } from "lucide-react";
+import { getMyTransactions } from "../../services/transactionService";
 
 export default function TransactionHistory() {
   const navigate = useNavigate();
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const transactions = [
-    {
-      id: "1",
-      seller: "Nike Store",
-      amount: "$120",
-      status: "Pending",
-      date: "Today",
-    },
-    {
-      id: "2",
-      seller: "Apple Store",
-      amount: "$599",
-      status: "Completed",
-      date: "Yesterday",
-    },
-    {
-      id: "3",
-      seller: "Gaming Hub",
-      amount: "$85",
-      status: "Cancelled",
-      date: "June 20",
-    },
-  ];
+  useEffect(() => {
+    const fetchTransactions = async () => {
+      try {
+        const response = await getMyTransactions();
+        setTransactions(response.data || []);
+      } catch (err) {
+        setError("Unable to load transactions.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+  }, []);
 
   const getStatusBadge = (status) => {
-    if (status === "Pending") {
+    if (status === "PENDING" || status === "PROCESSING") {
       return (
         <div className="flex items-center gap-1 text-amber-600 bg-amber-50 px-3 py-1 rounded-full text-xs font-medium">
           <Clock3 size={14} />
-          Pending
+          {status === "PROCESSING" ? "Processing" : "Pending"}
         </div>
       );
     }
 
-    if (status === "Completed") {
+    if (status === "SUCCESSFUL" || status === "SHIPPED") {
       return (
         <div className="flex items-center gap-1 text-green-600 bg-green-50 px-3 py-1 rounded-full text-xs font-medium">
           <CheckCircle2 size={14} />
-          Completed
+          {status === "SHIPPED" ? "Shipped" : "Completed"}
         </div>
       );
     }
@@ -79,9 +75,7 @@ export default function TransactionHistory() {
             <ArrowLeft size={18} />
           </button>
 
-          <h1 className="text-2xl font-bold text-gray-900">
-            Transaction History
-          </h1>
+          <h1 className="text-2xl font-bold text-gray-900">Transaction History</h1>
         </div>
 
         {/* Search */}
@@ -97,57 +91,49 @@ export default function TransactionHistory() {
           </div>
         </div>
 
-        {/* Transactions */}
-        <div className="space-y-4">
-          {transactions.map((transaction) => (
-            <div
-              key={transaction.id}
-              onClick={() => openTransaction(transaction.id)}
-              className="
-                bg-white
-                rounded-2xl
-                border
-                border-gray-100
-                p-5
-                hover:shadow-lg
-                hover:-translate-y-1
-                transition-all
-                cursor-pointer
-              "
-            >
-              <div className="flex items-center justify-between">
+        {loading ? (
+          <div className="p-6 text-center text-gray-500">Loading transactions...</div>
+        ) : error ? (
+          <div className="p-6 text-center text-red-500">{error}</div>
+        ) : transactions.length === 0 ? (
+          <div className="p-6 text-center text-gray-500">No transactions found.</div>
+        ) : (
+          <div className="space-y-4">
+            {transactions.map((transaction) => (
+              <div
+                key={transaction.id}
+                onClick={() => openTransaction(transaction.id)}
+                className="bg-white rounded-2xl border border-gray-100 p-5 hover:shadow-lg hover:-translate-y-1 transition-all cursor-pointer"
+              >
+                <div className="flex items-center justify-between">
 
-                <div>
-                  <h3 className="font-semibold text-gray-900">
-                    {transaction.seller}
-                  </h3>
-
-                  <p className="text-sm text-gray-500 mt-1">
-                    {transaction.date}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="text-right">
-                    <p className="font-bold text-gray-900">
-                      {transaction.amount}
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {transaction.seller_username || transaction.seller?.username || "Seller"}
+                    </h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {new Date(transaction.created_at).toLocaleString()}
                     </p>
-
-                    <div className="mt-2">
-                      {getStatusBadge(transaction.status)}
-                    </div>
                   </div>
 
-                  <ChevronRight
-                    size={18}
-                    className="text-gray-400"
-                  />
-                </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="font-bold text-gray-900">
+                        ${Number(transaction.amount).toFixed(2)}
+                      </p>
+                      <div className="mt-2">
+                        {getStatusBadge(transaction.status)}
+                      </div>
+                    </div>
 
+                    <ChevronRight size={18} className="text-gray-400" />
+                  </div>
+
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
       </div>
     </div>

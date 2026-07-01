@@ -8,6 +8,10 @@ export const getMyTransactions = async () => {
   return api.get('/api/transactions/my_transactions/');
 };
 
+export const getTransactionById = async (id) => {
+  return api.get(`/api/transactions/${id}/`);
+};
+
 export const updateTransactionStatus = async (id, payload) => {
   return api.post(`/api/transactions/${id}/update_status/`, payload);
 };
