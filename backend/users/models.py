@@ -44,8 +44,8 @@ class VerificationCode(models.Model):
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='verification_codes')
-    code = models.CharField(max_length=10)
-    vtype = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    code = models.CharField(max_length=14)
+    vtype = models.CharField(max_length=14, choices=TYPE_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
 
