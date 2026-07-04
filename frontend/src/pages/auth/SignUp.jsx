@@ -90,22 +90,22 @@ export default function SignUp() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-10 space-y-5">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-3">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">First Name</label>
-                <input type="text" placeholder="John" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">First Name</label>
+                <input type="text" placeholder="John" value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Last Name</label>
-                <input type="text" placeholder="Doe" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
+                <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Last Name</label>
+                <input type="text" placeholder="Doe" value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
               </div>
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Username</label>
-              <input type="text" placeholder="username" value={form.username} onChange={(e) => { setForm({ ...form, username: e.target.value }); handleCheckUsername(e.target.value); }} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Username</label>
+              <input type="text" placeholder="username" value={form.username} onChange={(e) => { setForm({ ...form, username: e.target.value }); handleCheckUsername(e.target.value); }} className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
 
               {usernameAvailable === true && <p className="text-sm text-green-600">Username is available</p>}
               {usernameAvailable === false && (
@@ -121,17 +121,17 @@ export default function SignUp() {
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Email</label>
-              <input type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Email</label>
+              <input type="email" placeholder="you@example.com" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">Phone Number</label>
-              <input type="tel" placeholder="+234 812 345 6789" value={form.phone_number} onChange={(e) => setForm({ ...form, phone_number: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">Phone Number</label>
+              <input type="tel" placeholder="+234 812 345 6789" value={form.phone_number} onChange={(e) => setForm({ ...form, phone_number: e.target.value })} className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500" />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
                 Password
               </label>
 
@@ -140,12 +140,12 @@ export default function SignUp() {
                 placeholder="••••••••"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
                 Confirm Password
               </label>
 
@@ -154,7 +154,7 @@ export default function SignUp() {
                 placeholder="••••••••"
                 value={form.password_confirm}
                 onChange={(e) => setForm({ ...form, password_confirm: e.target.value })}
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-4 text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
+                className="w-full rounded-2xl border border-gray-200 bg-white px-3 py-3 text-sm text-gray-900 placeholder-gray-400 outline-none transition-all duration-200 focus:border-transparent focus:ring-2 focus:ring-blue-500"
               />
             </div>
 
@@ -170,7 +170,7 @@ export default function SignUp() {
                 from-blue-700
                 via-blue-600
                 to-sky-500
-                py-4
+                py-3
                 font-semibold
                 text-white
                 transition-all

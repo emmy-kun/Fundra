@@ -15,16 +15,11 @@ export default function Login() {
 
     try {
       await login({ username: form.username, password: form.password });
-      // Determine whether onboarding is required
+
       try {
         const profile = await getProfile();
-        const onboarded = profile.data.onboarded;
         const role = profile.data.role;
-        if (!onboarded) {
-          navigate("/onboarding");
-        } else {
-          navigate(role === 'SELLER' ? '/seller/dashboard' : '/buyer/dashboard');
-        }
+        navigate(role === 'SELLER' ? '/seller/dashboard' : '/buyer/dashboard');
       } catch (e) {
         navigate('/buyer/dashboard');
       }
@@ -60,9 +55,15 @@ export default function Login() {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="mt-10 space-y-5">
+          <form onSubmit={handleSubmit} className="mt-8 space-y-4">
+            {error ? (
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-600">
+                {error}
+              </div>
+            ) : null}
+
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
                 Username
               </label>
 
@@ -70,28 +71,30 @@ export default function Login() {
                 type="text"
                 placeholder="username"
                 value={form.username}
-                onChange={(e) => setForm({ ...form, username: e.target.value })}
-                className="
+                onChange={(e) => {
+                  setForm({ ...form, username: e.target.value });
+                  setError("");
+                }}
+                className={`
                   w-full
                   rounded-2xl
                   border
-                  border-gray-200
-                  px-4
-                  py-4
+                  px-3
+                  py-3
+                  text-sm
                   text-gray-900
                   placeholder-gray-400
                   outline-none
                   transition-all
                   duration-200
-                  focus:ring-2
-                  focus:ring-blue-500
                   focus:border-transparent
-                "
+                  ${error ? "border-red-300 focus:ring-2 focus:ring-red-200" : "border-gray-200 focus:ring-2 focus:ring-blue-500"}
+                `}
               />
             </div>
 
             <div>
-              <label className="mb-2 block text-xs font-semibold uppercase tracking-wider text-gray-400">
+              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.2em] text-gray-400">
                 Password
               </label>
 
@@ -99,23 +102,25 @@ export default function Login() {
                 type="password"
                 placeholder="••••••••"
                 value={form.password}
-                onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="
+                onChange={(e) => {
+                  setForm({ ...form, password: e.target.value });
+                  setError("");
+                }}
+                className={`
                   w-full
                   rounded-2xl
                   border
-                  border-gray-200
-                  px-4
-                  py-4
+                  px-3
+                  py-3
+                  text-sm
                   text-gray-900
                   placeholder-gray-400
                   outline-none
                   transition-all
                   duration-200
-                  focus:ring-2
-                  focus:ring-blue-500
                   focus:border-transparent
-                "
+                  ${error ? "border-red-300 focus:ring-2 focus:ring-red-200" : "border-gray-200 focus:ring-2 focus:ring-blue-500"}
+                `}
               />
             </div>
 
@@ -147,7 +152,7 @@ export default function Login() {
                 from-blue-700
                 via-blue-600
                 to-sky-500
-                py-4
+                py-3
                 font-semibold
                 text-white
                 transition-all
