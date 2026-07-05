@@ -6,9 +6,11 @@ import ForgotPassword from "../pages/auth/ForgotPassword";
 import Onboarding from "../pages/auth/Onboarding";
 
 import BuyerDashboard from "../pages/buyer/Dashboard";
-import AddMoney from "../pages/buyer/AddMoney";
+import AddMoney from "../pages/shared/AddMoney";
 import SendMoney from "../pages/buyer/SendMoney";
-import Withdraw from "../pages/buyer/Withdraw";
+import Withdraw from "../pages/shared/Withdraw";
+import SellerDashboard from "../pages/seller/Dashboard";
+import RefundMoney from "../pages/seller/RefundMoney";
 
 import TransactionHistory from "../pages/shared/TransactionHistory";
 import TransactionDetails from "../pages/shared/TransactionDetails";
@@ -30,6 +32,9 @@ export default function AppRoutes() {
       <Route path="/buyer/add-money" element={<AddMoney />} />
       <Route path="/buyer/withdraw" element={<Withdraw />} />
       <Route path="/buyer/send-money" element={<SendMoney />} />
+
+      <Route path="/seller/dashboard" element={<SellerDashboard />} />
+      <Route path="/seller/refund-money" element={<RefundMoney />} />
 
       <Route
         path="/buyer/transaction-history"
