@@ -21,6 +21,7 @@ import EditProfile from "../pages/profile/EditProfile";
 import Settings from "../pages/settings/Settings";
 import ProtectedRoute from "./ProtectedRoute";
 import { getProfile } from "../services/authService";
+import RequestMoney from "../pages/seller/RequestMoney";
 
 function RootRedirect() {
   const [role, setRole] = useState(null);
@@ -87,6 +88,7 @@ export default function AppRoutes() {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/profile/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
       <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+      <Route path="/seller/request-money" element={<ProtectedRoute><RequestMoney /></ProtectedRoute>} />
     </Routes>
   );
 }
