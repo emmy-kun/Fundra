@@ -9,7 +9,13 @@ import {
   ShieldCheck,
   Receipt,
 } from "lucide-react";
-import { getTransactionById } from "../../services/transactionService";
+import { getProfile } from "../../services/authService";
+import {
+  cancelTransaction,
+  confirmDelivery,
+  getTransactionById,
+  updateTransactionStatus,
+} from "../../services/transactionService";
 
 const STATUS_LABEL = {
   PENDING: "Pending",
@@ -17,6 +23,18 @@ const STATUS_LABEL = {
   SHIPPED: "Shipped",
   SUCCESSFUL: "Completed",
   CANCELED: "Cancelled",
+};
+
+const STATUS_OPTIONS = {
+  PENDING: [
+    { value: "PENDING", label: "Pending" },
+    { value: "PROCESSING", label: "Processing" },
+  ],
+  PROCESSING: [
+    { value: "PROCESSING", label: "Processing" },
+    { value: "SHIPPED", label: "Shipped" },
+  ],
+  SHIPPED: [{ value: "SHIPPED", label: "Shipped" }],
 };
 
 const getStatusBadge = (status) => {
@@ -52,9 +70,18 @@ export default function TransactionDetails() {
   const [transaction, setTransaction] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [role, setRole] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     const fetchTransaction = async () => {
+      try {
+        const profile = await getProfile();
+        setRole(profile.data?.role || null);
+      } catch (err) {
+        setRole(null);
+      }
+
       try {
         const response = await getTransactionById(id);
         setTransaction(response.data);
@@ -92,11 +119,65 @@ export default function TransactionDetails() {
   const formattedAmount = transaction ? `$${Number(transaction.amount).toFixed(2)}` : "";
   const formattedDate = transaction ? new Date(transaction.created_at).toLocaleString() : "";
   const sellerEmail = transaction?.seller?.email || transaction?.seller?.username || "Seller";
+  const statusOptions = STATUS_OPTIONS[status] || [{ value: status, label: STATUS_LABEL[status] || status }];
+  const isBuyer = role === "BUYER";
+  const isSeller = role === "SELLER";
+
+  const refreshTransaction = async () => {
+    const response = await getTransactionById(id);
+    setTransaction(response.data);
+  };
+
+  const handleAction = async (action) => {
+    setActionLoading(true);
+    setError(null);
+
+    try {
+      if (isSeller) {
+        if (action === "processing") {
+          await updateTransactionStatus(id, { status: "PROCESSING" });
+        } else if (action === "shipped") {
+          await updateTransactionStatus(id, { status: "SHIPPED" });
+        } else if (action === "refund") {
+          await updateTransactionStatus(id, { status: "CANCELED" });
+        }
+      } else if (isBuyer) {
+        if (action === "cancel") {
+          await cancelTransaction(id);
+        } else if (action === "confirm") {
+          await confirmDelivery(id);
+        }
+      }
+
+      await refreshTransaction();
+    } catch (err) {
+      setError(err?.response?.data?.error || "Unable to update this transaction.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleStatusChange = async (nextStatus) => {
+    if (!isSeller || nextStatus === status || actionLoading) {
+      return;
+    }
+
+    setActionLoading(true);
+    setError(null);
+
+    try {
+      await updateTransactionStatus(id, { status: nextStatus });
+      await refreshTransaction();
+    } catch (err) {
+      setError(err?.response?.data?.error || "Unable to update this transaction.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-6xl mx-auto px-4">
-
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
@@ -114,19 +195,14 @@ export default function TransactionDetails() {
 
         {/* Main Layout */}
         <div className="grid lg:grid-cols-3 gap-6">
-
           {/* Left Side */}
           <div className="lg:col-span-2">
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-8">
-
               {/* Amount */}
               <div className="text-center border-b border-gray-100 pb-8">
                 <p className="text-sm text-gray-500">Escrow Payment</p>
                 <h2 className="text-6xl font-extrabold text-gray-900 mt-3">{formattedAmount}</h2>
-                <div className="inline-flex mt-5 items-center gap-2 px-4 py-2 rounded-full bg-amber-50 text-amber-700 text-sm font-medium">
-                  <Clock3 size={16} />
-                  {status === "SUCCESSFUL" ? "Completed" : STATUS_LABEL[status] || status}
-                </div>
+                {getStatusBadge(status)}
               </div>
 
               {/* Details */}
@@ -158,16 +234,56 @@ export default function TransactionDetails() {
 
               {/* Actions */}
               <div className="mt-10 flex flex-col md:flex-row gap-4">
-                <button
-                  className="flex-1 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 py-4 text-white font-semibold hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer"
-                >
-                  I Have Received My Order
-                </button>
-                <button
-                  className="flex-1 rounded-2xl border border-red-200 bg-red-50 py-4 text-red-600 font-semibold hover:bg-red-100 transition-all cursor-pointer"
-                >
-                  Cancel Payment
-                </button>
+                {isSeller ? (
+                  <>
+                    {status === "PENDING" ? (
+                      <button
+                        onClick={() => handleAction("processing")}
+                        disabled={actionLoading}
+                        className="flex-1 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 py-4 text-white font-semibold hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer disabled:opacity-60"
+                      >
+                        {actionLoading ? "Working..." : "Mark as Processing"}
+                      </button>
+                    ) : null}
+                    {status === "PROCESSING" ? (
+                      <button
+                        onClick={() => handleAction("shipped")}
+                        disabled={actionLoading}
+                        className="flex-1 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 py-4 text-white font-semibold hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer disabled:opacity-60"
+                      >
+                        {actionLoading ? "Working..." : "I have received my item"}
+                      </button>
+                    ) : null}
+                    {(status === "PENDING" || status === "PROCESSING") ? (
+                      <button
+                        onClick={() => handleAction("refund")}
+                        disabled={actionLoading}
+                        className="flex-1 rounded-2xl border border-red-200 bg-red-50 py-4 text-red-600 font-semibold hover:bg-red-100 transition-all cursor-pointer disabled:opacity-60"
+                      >
+                        {actionLoading ? "Working..." : "Refund Buyer"}
+                      </button>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    {(status === "PENDING" || status === "PROCESSING") ? (
+                      <button
+                        onClick={() => handleAction("cancel")}
+                        disabled={actionLoading || status === "SHIPPED"}
+                        className="flex-1 rounded-2xl border border-red-200 bg-red-50 py-4 text-red-600 font-semibold hover:bg-red-100 transition-all cursor-pointer disabled:opacity-60"
+                      >
+                        {actionLoading ? "Working..." : "Cancel Payment"}
+                      </button>
+                    ) : null}
+                    <button
+                      onClick={() => handleAction("confirm")}
+                      disabled={actionLoading || status !== "SHIPPED"}
+                      className="flex-1 rounded-2xl bg-gradient-to-r from-blue-700 via-blue-600 to-sky-500 py-4 text-white font-semibold hover:shadow-xl hover:scale-[1.01] transition-all cursor-pointer disabled:opacity-60"
+                    >
+                      {actionLoading ? "Working..." : "I have received my order"}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -190,6 +306,41 @@ export default function TransactionDetails() {
                   Your payment is currently held securely by Fundra. Funds will only be released after you confirm receipt of your order.
                 </p>
               </div>
+            </div>
+
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mt-6">
+              <div className="flex items-center gap-3 mb-4">
+                <Receipt size={20} className="text-blue-600" />
+                <h3 className="font-semibold text-gray-900">Transaction Status</h3>
+              </div>
+
+              {isSeller ? (
+                <div className="space-y-3">
+                  <label htmlFor="transaction-status" className="text-sm font-medium text-gray-700">
+                    Update the current progress
+                  </label>
+                  <select
+                    id="transaction-status"
+                    value={status}
+                    onChange={(event) => handleStatusChange(event.target.value)}
+                    disabled={actionLoading || status === "SUCCESSFUL" || status === "CANCELED"}
+                    className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-medium text-gray-700 focus:border-blue-500 focus:outline-none"
+                  >
+                    {statusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500">
+                    Status can only move forward and cannot be reverted once updated.
+                  </p>
+                </div>
+              ) : (
+                <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4">
+                  <p className="text-sm text-slate-600">Current progress: {STATUS_LABEL[status] || status}</p>
+                </div>
+              )}
             </div>
 
             <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6 mt-6">

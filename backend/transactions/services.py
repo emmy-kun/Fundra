@@ -63,7 +63,7 @@ class TransactionService:
         valid_transitions = {
             Transaction.Status.PENDING: [Transaction.Status.PROCESSING, Transaction.Status.CANCELED],
             Transaction.Status.PROCESSING: [Transaction.Status.SHIPPED, Transaction.Status.CANCELED],
-            Transaction.Status.SHIPPED: [Transaction.Status.CANCELED],
+            Transaction.Status.SHIPPED: [],
             Transaction.Status.SUCCESSFUL: [],
             Transaction.Status.CANCELED: [],
         }

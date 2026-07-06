@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   XCircle,
 } from "lucide-react";
+import { getProfile } from "../../services/authService";
 import { getMyTransactions } from "../../services/transactionService";
 
 const ICON_MAP = {
@@ -39,9 +40,17 @@ export default function Notifications() {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [role, setRole] = useState(null);
 
   useEffect(() => {
     const fetchNotifications = async () => {
+      try {
+        const profile = await getProfile();
+        setRole(profile.data?.role || null);
+      } catch (err) {
+        setRole(null);
+      }
+
       try {
         const response = await getMyTransactions();
         const transactions = response.data?.results || response.data || [];
@@ -57,15 +66,17 @@ export default function Notifications() {
           let message;
 
           if (txn.status === "SUCCESSFUL") {
-            message = `$${amount} payment was completed with ${counterparty}.`;
+            message = role === "SELLER"
+              ? `$${amount} payment was released to your balance from ${counterparty}.`
+              : `$${amount} payment was completed with ${counterparty}.`;
           } else if (txn.status === "CANCELED") {
-            message = `$${amount} transaction was cancelled with ${counterparty}.`;
+            message = `$${amount} transaction was refunded for ${counterparty}.`;
           } else if (txn.status === "SHIPPED") {
-            message = `$${amount} order has shipped with ${counterparty}.`;
+            message = `$${amount} order has shipped and is awaiting buyer confirmation from ${counterparty}.`;
           } else if (txn.status === "PROCESSING") {
             message = `$${amount} transaction is processing with ${counterparty}.`;
           } else {
-            message = `$${amount} transaction is pending with ${counterparty}.`;
+            message = `$${amount} escrow payment is pending with ${counterparty}.`;
           }
 
           return {

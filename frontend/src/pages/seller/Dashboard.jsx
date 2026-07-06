@@ -24,9 +24,8 @@ import trusted from "../../assets/images/trusted.png";
 import verified from "../../assets/images/verified.png";
 
 import { getProfile } from "../../services/authService";
-
-// Backend later:
-// import { getSellerDashboard } from "../../services/sellerService";
+import { getMyTransactions } from "../../services/transactionService";
+import { getMyWallet } from "../../services/walletService";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -48,6 +47,7 @@ export default function Dashboard() {
   });
 
   const [recentRequests, setRecentRequests] = useState([]);
+  const [wallet, setWallet] = useState(null);
 
   const [showBalance, setShowBalance] = useState(true);
 
@@ -105,22 +105,30 @@ export default function Dashboard() {
     (async () => {
       try {
         const profile = await getProfile();
-
         setUser(profile.data);
       } catch (err) {
         console.log(err);
       }
 
-      /*
-      BACKEND DEVELOPER
+      try {
+        const walletResponse = await getMyWallet();
+        const walletData = walletResponse.data || {};
+        setWallet(walletData);
+        setSellerStats({
+          availableEarnings: walletData.available_balance || 0,
+          pendingRelease: walletData.escrow_balance || 0,
+        });
+      } catch (err) {
+        console.log(err);
+      }
 
-      const dashboard = await getSellerDashboard();
-
-      setSellerStats(dashboard.stats);
-
-      setRecentRequests(dashboard.requests);
-
-      */
+      try {
+        const transactionsResponse = await getMyTransactions();
+        const transactions = transactionsResponse.data || [];
+        setRecentRequests(transactions);
+      } catch (err) {
+        console.log(err);
+      }
     })();
   }, []);
 
@@ -325,25 +333,17 @@ export default function Dashboard() {
 
                 </div>
 
-                <span
-                  className="
-                    rounded-full
-                    bg-amber-400
-                    px-4
-                    py-1
-                    text-xs
-                    font-bold
-                    text-gray-900
-                  "
-                >
-                  {
-                    recentRequests.filter(
-                      (r) => r.status === "pending"
-                    ).length
-                  }
-                  {" "}
-                  Pending
-                </span>
+                <div className="flex items-center gap-3">
+                  <span className="rounded-full bg-amber-400 px-4 py-1 text-xs font-bold text-gray-900">
+                    {recentRequests.filter((r) => r.status === "SHIPPED" || r.status === "PENDING" || r.status === "PROCESSING").length} Active
+                  </span>
+                  <button
+                    onClick={() => navigate("/seller/transaction-history")}
+                    className="rounded-full bg-white/20 px-3 py-1 text-xs font-semibold text-white hover:bg-white/30"
+                  >
+                    History
+                  </button>
+                </div>
 
               </div>
 
@@ -359,7 +359,7 @@ export default function Dashboard() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: .98 }}
                 onClick={() =>
-                  navigate("/seller/request-money")
+                  navigate("/seller/refund-money")
                 }
                 className="
                   bg-white
@@ -614,14 +614,24 @@ export default function Dashboard() {
 
                           <span
                             className={`inline-flex mt-1 px-3 py-1 rounded-full text-xs font-semibold ${
-                              request.status === "completed"
+                              request.status === "SUCCESSFUL"
                                 ? "bg-green-100 text-green-700"
-                                : request.status === "cancelled"
+                                : request.status === "CANCELED"
                                 ? "bg-red-100 text-red-700"
+                                : request.status === "SHIPPED"
+                                ? "bg-blue-100 text-blue-700"
                                 : "bg-amber-100 text-amber-700"
                             }`}
                           >
-                            {request.status}
+                            {request.status === "SUCCESSFUL"
+                              ? "Completed"
+                              : request.status === "CANCELED"
+                              ? "Cancelled"
+                              : request.status === "SHIPPED"
+                              ? "Shipped"
+                              : request.status === "PROCESSING"
+                              ? "Processing"
+                              : "Pending"}
                           </span>
 
                         </div>
@@ -663,7 +673,7 @@ export default function Dashboard() {
 
           <button
             onClick={() =>
-              navigate("/seller/request-money")
+              navigate("/seller/refund-money")
             }
             className="
               -mt-8

@@ -1,33 +1,48 @@
-import { useState } from "react";
-import { ArrowLeft, Mail, Wallet, FileText, ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ArrowLeft, Clock3, ShieldCheck, Wallet, UserRound } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { createTransaction } from "../../services/transactionService";
+import { getMyTransactions, updateTransactionStatus } from "../../services/transactionService";
 
-export default function SendMoney() {
+export default function RefundMoney() {
   const navigate = useNavigate();
-
-  const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState("");
-  const [note, setNote] = useState("");
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [processingId, setProcessingId] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  useEffect(() => {
+    const loadTransactions = async () => {
+      try {
+        const response = await getMyTransactions();
+        const sellerTransactions = (response.data || []).filter((t) => ["PENDING", "PROCESSING", "SHIPPED"].includes(t.status));
+        setTransactions(sellerTransactions);
+      } catch (err) {
+        setError("Unable to load escrow transactions.");
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    loadTransactions();
+  }, []);
+
+  const handleAction = async (id, status) => {
+    setProcessingId(id);
     try {
-      await createTransaction({ seller_email: email, amount: Number(amount), description: note });
-      navigate("/buyer/transaction-history");
+      await updateTransactionStatus(id, { status });
+      const response = await getMyTransactions();
+      const sellerTransactions = (response.data || []).filter((t) => ["PENDING", "PROCESSING", "SHIPPED"].includes(t.status));
+      setTransactions(sellerTransactions);
     } catch (err) {
-      setError(err?.response?.data?.error || "Unable to create this transaction.");
+      setError(err?.response?.data?.error || "Unable to update the escrow transaction.");
+    } finally {
+      setProcessingId(null);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-2xl mx-auto px-4 py-6">
-        
-        {/* Header */}
+      <div className="max-w-5xl mx-auto px-4 py-6">
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate(-1)}
@@ -36,114 +51,64 @@ export default function SendMoney() {
             <ArrowLeft size={18} />
           </button>
 
-          <h1 className="text-xl font-bold text-gray-900">
-            Send Money
-          </h1>
+          <div>
+            <h1 className="text-xl font-bold text-gray-900">Escrow Workflow</h1>
+            <p className="text-sm text-gray-500">Track pending, shipped, and refundable payments.</p>
+          </div>
         </div>
 
-        {/* Form Card */}
         <div className="bg-white rounded-3xl border border-gray-100 shadow-sm p-6">
+          {loading ? (
+            <div className="p-6 text-center text-gray-500">Loading escrow transactions...</div>
+          ) : error ? (
+            <div className="p-6 text-center text-red-600">{error}</div>
+          ) : transactions.length === 0 ? (
+            <div className="p-6 text-center text-gray-500">No active escrows right now.</div>
+          ) : (
+            <div className="space-y-4">
+              {transactions.map((transaction) => (
+                <div key={transaction.id} className="rounded-2xl border border-gray-100 p-4">
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex items-start gap-3">
+                      <div className="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center">
+                        <ShieldCheck size={18} className="text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {transaction.buyer_username || transaction.buyer?.username || "Buyer"}
+                        </h3>
+                        <p className="text-sm text-gray-500 mt-1">{transaction.description || "Escrow payment"}</p>
+                        <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
+                          <span className="inline-flex items-center gap-1"><Wallet size={14} /> ${Number(transaction.amount).toFixed(2)}</span>
+                          <span className="inline-flex items-center gap-1"><UserRound size={14} /> {transaction.status}</span>
+                        </div>
+                      </div>
+                    </div>
 
-          {/* Seller Email */}
-          <div className="mb-5">
-            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">
-              Seller Email
-            </label>
-
-            <div className="mt-2 flex items-center gap-3 border border-gray-200 rounded-2xl px-4 py-4">
-              <Mail size={18} className="text-gray-400" />
-              <input
-                type="email"
-                placeholder="seller@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full outline-none"
-              />
+                    <div className="flex flex-wrap gap-2">
+                      {transaction.status === "PENDING" ? (
+                        <>
+                          <button onClick={() => handleAction(transaction.id, "PROCESSING")} disabled={processingId === transaction.id} className="rounded-full bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-60">{processingId === transaction.id ? "Working..." : "Mark Processing"}</button>
+                          <button onClick={() => handleAction(transaction.id, "CANCELED")} disabled={processingId === transaction.id} className="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600">Refund</button>
+                        </>
+                      ) : null}
+                      {transaction.status === "PROCESSING" ? (
+                        <>
+                          <button onClick={() => handleAction(transaction.id, "SHIPPED")} disabled={processingId === transaction.id} className="rounded-full bg-blue-600 px-3 py-2 text-sm font-semibold text-white disabled:opacity-60">{processingId === transaction.id ? "Working..." : "Mark Shipped"}</button>
+                          <button onClick={() => handleAction(transaction.id, "CANCELED")} disabled={processingId === transaction.id} className="rounded-full border border-red-200 bg-red-50 px-3 py-2 text-sm font-semibold text-red-600">Refund</button>
+                        </>
+                      ) : null}
+                      {transaction.status === "SHIPPED" ? (
+                        <div className="inline-flex items-center gap-2 rounded-full bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
+                          <Clock3 size={14} /> Waiting for buyer confirmation
+                        </div>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-
-          {/* Amount */}
-          <div className="mb-5">
-            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">
-              Amount
-            </label>
-
-            <div className="mt-2 flex items-center gap-3 border border-gray-200 rounded-2xl px-4 py-4">
-              <Wallet size={18} className="text-gray-400" />
-              <input
-                type="number"
-                placeholder="0.00"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                className="w-full outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Note */}
-          <div>
-            <label className="text-xs uppercase font-semibold text-gray-400 tracking-wide">
-              Note
-            </label>
-
-            <div className="mt-2 flex gap-3 border border-gray-200 rounded-2xl px-4 py-4">
-              <FileText size={18} className="text-gray-400 mt-1" />
-
-              <textarea
-                rows="4"
-                placeholder="What is this payment for?"
-                value={note}
-                onChange={(e) => setNote(e.target.value)}
-                className="w-full outline-none resize-none"
-              />
-            </div>
-          </div>
-
-          {/* Escrow Notice */}
-          <div className="mt-6 bg-blue-50 border border-blue-100 rounded-2xl p-5">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="text-blue-600" size={22} />
-
-              <div>
-                <h3 className="font-semibold text-blue-900">
-                  Escrow Protection
-                </h3>
-
-                <p className="text-sm text-blue-700 mt-1 leading-relaxed">
-                  Funds are securely held by Fundra and will only be released
-                  to the seller after you confirm that you have received your
-                  order.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Continue */}
-          <form onSubmit={handleSubmit}>
-            {error ? <p className="mt-4 text-sm text-red-600">{error}</p> : null}
-            <button
-              type="submit"
-              className="
-              mt-6
-              w-full
-              py-4
-              rounded-2xl
-              bg-gradient-to-r
-              from-blue-700
-              via-blue-600
-              to-sky-500
-              text-white
-              font-semibold
-              hover:shadow-xl
-              hover:scale-[1.01]
-              transition-all
-              cursor-pointer
-            "
-          >
-            Continue
-          </button>
-          </form>
-
+          )}
         </div>
       </div>
     </div>
