@@ -296,18 +296,38 @@ return (
 
               </div>
 
-              <div
-                className="
-                  h-14
-                  w-14
-                  rounded-2xl
-                  bg-white/20
-                  flex
-                  items-center
-                  justify-center
-                "
-              >
-                <Wallet size={28} />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate("/seller/transaction-history")}
+                  className="
+                    h-14
+                    w-14
+                    rounded-2xl
+                    bg-white/20
+                    flex
+                    items-center
+                    justify-center
+                    hover:bg-white/30
+                    transition-colors
+                  "
+                  aria-label="View transaction history"
+                >
+                  <History size={24} />
+                </button>
+
+                <div
+                  className="
+                    h-14
+                    w-14
+                    rounded-2xl
+                    bg-white/20
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <Wallet size={28} />
+                </div>
               </div>
 
             </div>
@@ -327,9 +347,8 @@ return (
                         sellerStats.pendingRelease
                       ).toLocaleString()}`
                     : "••••••"}
-
+                    
                 </h3>
-
               </div>
 
               <span
@@ -363,7 +382,7 @@ return (
 
           <div className="space-y-5">
 
-                      {/* ================= REQUEST MONEY ================= */}
+                      {/* ================= Refund Money ================= */}
 
             <motion.button
               whileHover={{ scale: 1.02 }}
@@ -406,11 +425,11 @@ return (
                   <div>
 
                     <h3 className="font-bold text-gray-900">
-                      Request Money
+                      Refund Money
                     </h3>
 
                     <p className="text-sm text-gray-500 mt-1">
-                      Create a secure escrow request
+                      Create a secure escrow refund
                     </p>
 
                   </div>
@@ -475,7 +494,7 @@ return (
                     </h3>
 
                     <p className="text-sm text-gray-500 mt-1">
-                      View all payment requests
+                      View all pending payments 
                     </p>
 
                   </div>
@@ -549,7 +568,7 @@ return (
                     <div className="flex items-center justify-between mb-6">
 
             <h3 className="text-lg font-bold text-gray-900">
-              Recent Requests
+              Recent Transactions
             </h3>
 
             <button
@@ -573,7 +592,7 @@ return (
               />
 
               <p className="mt-4 text-gray-500">
-                No payment requests yet.
+                No recent transactions yet.
               </p>
 
             </div>
