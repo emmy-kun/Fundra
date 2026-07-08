@@ -50,7 +50,7 @@ export default function AddMoney() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="h-10 w-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"
           >
             <ArrowLeft size={18} />
@@ -69,7 +69,7 @@ export default function AddMoney() {
 
           <div className="flex items-center gap-2">
             <span className="text-3xl font-bold text-gray-900">
-              USD
+              ₦
             </span>
 
             <input
@@ -89,7 +89,7 @@ export default function AddMoney() {
           </div>
 
           <p className="text-xs text-gray-400 mt-4">
-            Current Balance: USD {Number(balance).toFixed(2)}
+            Current Balance: ₦{Number(balance).toFixed(2)}
           </p>
         </div>
 

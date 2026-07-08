@@ -67,16 +67,16 @@ export default function Notifications() {
 
           if (txn.status === "SUCCESSFUL") {
             message = role === "SELLER"
-              ? `$${amount} payment was released to your balance from ${counterparty}.`
-              : `$${amount} payment was completed with ${counterparty}.`;
+              ? `₦${amount} payment was released to your balance from ${counterparty}.`
+              : `₦${amount} payment was completed with ${counterparty}.`;
           } else if (txn.status === "CANCELED") {
-            message = `$${amount} transaction was refunded for ${counterparty}.`;
+            message = `₦${amount} transaction was refunded for ${counterparty}.`;
           } else if (txn.status === "SHIPPED") {
-            message = `$${amount} order has shipped and is awaiting buyer confirmation from ${counterparty}.`;
+            message = `₦${amount} order has shipped and is awaiting buyer confirmation from ${counterparty}.`;
           } else if (txn.status === "PROCESSING") {
-            message = `$${amount} transaction is processing with ${counterparty}.`;
+            message = `₦${amount} transaction is processing with ${counterparty}.`;
           } else {
-            message = `$${amount} escrow payment is pending with ${counterparty}.`;
+            message = `₦${amount} escrow payment is pending with ${counterparty}.`;
           }
 
           return {
@@ -114,7 +114,7 @@ export default function Notifications() {
 
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="h-10 w-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 cursor-pointer"
           >
             <ArrowLeft size={18} />

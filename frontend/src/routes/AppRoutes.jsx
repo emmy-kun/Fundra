@@ -24,28 +24,52 @@ import { getProfile } from "../services/authService";
 import RequestMoney from "../pages/seller/RequestMoney";
 
 function RootRedirect() {
-  const [role, setRole] = useState(null);
+  const [role, setRole] = useState(undefined);
+  const [checking, setChecking] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
       setRole(null);
+      setChecking(false);
       return;
     }
+
+    let isMounted = true;
 
     const loadRole = async () => {
       try {
         const response = await getProfile();
-        setRole(response.data?.role || null);
+        if (isMounted) {
+          setRole(response.data?.role || null);
+        }
       } catch (error) {
-        setRole(null);
+        if (isMounted) {
+          setRole(null);
+        }
+      } finally {
+        if (isMounted) {
+          setChecking(false);
+        }
       }
     };
 
     loadRole();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
-  if (!localStorage.getItem("accessToken")) {
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-gray-600">
+        Loading...
+      </div>
+    );
+  }
+
+  if (!localStorage.getItem("accessToken") || !role) {
     return <Navigate to="/login" replace />;
   }
 
@@ -57,7 +81,7 @@ function RootRedirect() {
     return <Navigate to="/buyer/dashboard" replace />;
   }
 
-  return null;
+  return <Navigate to="/login" replace />;
 }
 
 export default function AppRoutes() {

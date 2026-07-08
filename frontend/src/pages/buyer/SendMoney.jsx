@@ -30,7 +30,7 @@ export default function SendMoney() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="h-10 w-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"
           >
             <ArrowLeft size={18} />

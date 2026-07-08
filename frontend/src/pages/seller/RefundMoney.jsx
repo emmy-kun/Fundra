@@ -45,7 +45,7 @@ export default function RefundMoney() {
       <div className="max-w-5xl mx-auto px-4 py-6">
         <div className="flex items-center gap-4 mb-6">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="h-10 w-10 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"
           >
             <ArrowLeft size={18} />
@@ -79,7 +79,7 @@ export default function RefundMoney() {
                         </h3>
                         <p className="text-sm text-gray-500 mt-1">{transaction.description || "Escrow payment"}</p>
                         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                          <span className="inline-flex items-center gap-1"><Wallet size={14} /> ${Number(transaction.amount).toFixed(2)}</span>
+                          <span className="inline-flex items-center gap-1"><Wallet size={14} /> ₦{Number(transaction.amount).toFixed(2)}</span>
                           <span className="inline-flex items-center gap-1"><UserRound size={14} /> {transaction.status}</span>
                         </div>
                       </div>

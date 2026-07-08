@@ -9,7 +9,7 @@ export default function Withdraw() {
         <h1 className="text-2xl font-bold mb-4">Withdraw</h1>
         <p className="text-gray-600">This feature will be available soon.</p>
         <div className="mt-6">
-          <button onClick={() => navigate(-1)} className="px-4 py-2 rounded bg-blue-600 text-white">Go back</button>
+          <button onClick={() => navigate("/")} className="px-4 py-2 rounded bg-blue-600 text-white">Go back</button>
         </div>
       </div>
     </div>

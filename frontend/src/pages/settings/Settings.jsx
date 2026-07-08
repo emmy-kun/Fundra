@@ -49,7 +49,7 @@ export default function Settings() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="
               h-11
               w-11

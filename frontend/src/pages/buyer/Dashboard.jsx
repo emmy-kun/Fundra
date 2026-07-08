@@ -157,7 +157,7 @@ export default function Dashboard() {
                 <p className="text-blue-100 text-sm">Available Balance</p>
 
                 <h2 className="mt-3 text-4xl font-extrabold">
-                  {showBalance ? `$${Number(balance).toFixed(2)}` : "••••••••"}
+                  {showBalance ? `₦${Number(balance).toFixed(2)}` : "••••••••"}
                 </h2>
               </div>
 
@@ -339,7 +339,7 @@ export default function Dashboard() {
                       </div>
 
                       <span className="font-bold text-gray-900">
-                        ${Number(item.amount).toFixed(2)}
+                        ₦{Number(item.amount).toFixed(2)}
                       </span>
                     </div>
                   </div>

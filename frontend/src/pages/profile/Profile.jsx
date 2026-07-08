@@ -18,6 +18,9 @@ export default function Profile() {
   const [codeInput, setCodeInput] = useState("");
   const [loadingVerify, setLoadingVerify] = useState(false);
 
+  const appendTimestamp = (url) =>
+    url ? `${url}${url.includes("?") ? "&" : "?"}t=${Date.now()}` : url;
+
   useEffect(() => {
     (async () => {
       try {
@@ -42,8 +45,9 @@ export default function Profile() {
           const fd = new FormData();
           fd.append('profile_image', file);
           const res = await updateProfile(fd);
-          setProfileImage(res.data.profile_image);
-          setUser(res.data);
+          const imageUrl = appendTimestamp(res.data.profile_image);
+          setUser({ ...res.data, profile_image: imageUrl });
+          setProfileImage(imageUrl);
         } catch (err) {
           // fallback to local preview on error
           setProfileImage(URL.createObjectURL(file));
@@ -85,7 +89,7 @@ export default function Profile() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"
           >
             <ArrowLeft size={20} />

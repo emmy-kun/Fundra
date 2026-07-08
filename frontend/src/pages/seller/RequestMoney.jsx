@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   Mail,
   Package,
-  DollarSign,
   Calendar,
   FileText,
   Loader2,
@@ -213,15 +212,14 @@ export default function RequestMoney() {
   <div>
 
     <label className="block text-sm font-semibold text-gray-700 mb-2">
-      Amount (USD)
+      Amount (₦)
     </label>
 
     <div className="relative">
 
-      <DollarSign
-        size={18}
-        className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"
-      />
+      <span className="absolute left-4 top-1/2 -translate-y-1/2 -translate-x-1/2 text-gray-400 text-lg font-semibold">
+        ₦
+      </span>
 
       <input
         type="number"

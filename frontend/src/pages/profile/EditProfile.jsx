@@ -54,7 +54,7 @@ export default function EditProfile(){
     <div className="min-h-screen bg-slate-50">
       <div className="max-w-3xl mx-auto px-4 py-8">
         <div className="flex items-center gap-4 mb-8">
-          <button onClick={()=>navigate(-1)} className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"><ArrowLeft size={20} /></button>
+          <button onClick={()=>navigate("/")} className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"><ArrowLeft size={20} /></button>
           <h1 className="text-2xl font-bold">Edit Profile</h1>
         </div>
 

@@ -116,7 +116,7 @@ export default function TransactionDetails() {
   }
 
   const status = transaction?.status || "PENDING";
-  const formattedAmount = transaction ? `$${Number(transaction.amount).toFixed(2)}` : "";
+  const formattedAmount = transaction ? `₦${Number(transaction.amount).toFixed(2)}` : "";
   const formattedDate = transaction ? new Date(transaction.created_at).toLocaleString() : "";
   const sellerEmail = transaction?.seller?.email || transaction?.seller?.username || "Seller";
   const statusOptions = STATUS_OPTIONS[status] || [{ value: status, label: STATUS_LABEL[status] || status }];
@@ -181,7 +181,7 @@ export default function TransactionDetails() {
         {/* Header */}
         <div className="flex items-center gap-4 mb-8">
           <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate("/")}
             className="h-11 w-11 rounded-xl bg-white border border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-all cursor-pointer"
           >
             <ArrowLeft size={18} />

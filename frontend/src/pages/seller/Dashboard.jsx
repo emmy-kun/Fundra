@@ -229,7 +229,15 @@ return (
               justify-center
             "
           >
-            <User size={20} />
+            {user?.profile_image ? (
+              <img
+                src={user.profile_image}
+                alt="avatar"
+                className="h-9 w-9 rounded-full object-cover"
+              />
+            ) : (
+              <User size={20} />
+            )}
           </button>
 
         </div>
@@ -272,7 +280,7 @@ return (
                   <h2 className="text-4xl font-extrabold tracking-wide">
 
                     {showBalance
-                      ? `$${Number(
+                      ? `₦${Number(
                           sellerStats.availableEarnings
                         ).toLocaleString()}`
                       : "••••••••"}
@@ -343,7 +351,7 @@ return (
                 <h3 className="text-xl font-bold mt-1">
 
                   {showBalance
-                    ? `$${Number(
+                    ? `₦${Number(
                         sellerStats.pendingRelease
                       ).toLocaleString()}`
                     : "••••••"}
@@ -637,7 +645,7 @@ return (
                     <div className="text-right">
 
                       <p className="font-bold text-gray-900">
-                        $
+                        ₦
                         {Number(
                           request.amount || 0
                         ).toLocaleString()}
